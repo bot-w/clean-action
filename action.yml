@@ -1,0 +1,37 @@
+
+name: 'clean workflow runs'
+author : dmvict <dm.vict.kr@gmail.com>
+branding:
+  icon: 'scissors'
+  color: 'white'
+description: 'Flexible and configurable action for removing completed workflow runs.'
+inputs:
+  token:
+    description: 'A personal access token.'
+    required: false
+  repo:
+    description: 'A repo from which delete workflow runs. Default is current repo.'
+    required: false
+  branch:
+    description: 'A branch from which delete workflow runs. Default is current branch.'
+    required: false
+  run_statuses:
+    description: 'Filter for workflow runs statuses. Accepts statuses: `cancelled`, `skipped`, `timed_out`, `success`, `failure`, `all`.'
+    required: false
+    default: 'all'
+  save_period:
+    description: 'Determines period in which the workflow runs will be saved.'
+    required: false
+    default: '2120:00:00'
+  save_min_runs_number:
+    description: 'A minimal number of completed runs which will be saved.'
+    required: false
+    default: 10
+  dry:
+    description: 'Enables dry run of action. Action will print the list of workflow runs to delete.'
+    required: false
+    default: false
+runs:
+  using: 'node12'
+  main: 'src/Main.js'
+
