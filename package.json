@@ -11,6 +11,9 @@
   "files": [
     "src/Main.js"
   ],
+  "scripts": {
+    "test": "tst .run test/"
+  },
   "engines" : { "node" : ">=10.0.0" },
   "homepage": "https://github.com/dmvict/clean-workflow-runs",
   "repository": "https://github.com/dmvict/clean-workflow-runs",

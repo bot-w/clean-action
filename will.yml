@@ -1,3 +1,4 @@
+
 about:
   name: clean-workflow-runs
   version: 1.0.0
@@ -7,6 +8,8 @@ about:
     - Dmytro Kryvoruchko <dm.vict.kr@gmail.com>
   license: MIT
   npm.homepage: 'https://github.com/dmvict/clean-workflow-runs'
+  npm.scripts:
+    test: tst .run test/
   keywords:
     - action
     - clean
@@ -18,6 +21,7 @@ about:
     - workflow run
   interpreters:
     - njs >= 10.0.0
+
 build:
   action.release:
     criterion:
@@ -36,6 +40,7 @@ build:
       - tag
       - push
       - release
+
 step:
   bump:
     inherit: version.bump
@@ -64,13 +69,11 @@ step:
     tag: 'v{about::version}'
   package.json.generate:
     inherit: npm.generate
-    entryPath: 'path::entry.proto.no.tests'
+    entryPath: 'path::entry'
     packagePath: package.json
     filesPath: '{path::proto}/**'
     withDisabledSubmodules: 1
-    criterion:
-      content:
-        - proto
+
 path:
   origins:
     - 'git+https:///github.com/dmvict/clean-workflow-runs'
@@ -86,6 +89,7 @@ path:
     - node_modules
   proto: ./src
   tests: ./test
+
 submodule:
   '@actions/core':
     path: 'npm:///@actions/core!1.6.0'
@@ -93,3 +97,8 @@ submodule:
   '@octokit/rest':
     path: 'npm:///@octokit/rest!18.12.0'
     enabled: 0
+  wTesting:
+    path: 'npm:///wTesting'
+    enabled: 0
+    criterion:
+      development: 1

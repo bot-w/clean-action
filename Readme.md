@@ -29,13 +29,11 @@ A branch from which delete workflow runs. Default is current branch.
 
 Default: current branch.
 
-### `run_statuses`
+### `run_conclusions`
 
-Filter for workflow runs statuses. Accepts statuses: `cancelled`, `skipped`, `timed_out`, `success`, `failure`, `all`.
+Filter for workflow runs conclusion. Accepts all available conclusions.
 
-Default: `all`.
-
-_Note:_ : with `all` action will delete workflow runs with all available statuses.
+_Note:_ : if filter is not defined, then action filters runs by time.
 
 ### `save_period`
 
@@ -67,7 +65,7 @@ with:
   token: ${{ secrets.GITHUB_TOKEN }}
   repo: dmvict/clean-workflow-runs
   branch: dev
-  run_statuses: |
+  run_conclusions: |
     cancelled
     skipped
   save_period: '00:00:00'

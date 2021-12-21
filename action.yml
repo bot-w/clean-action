@@ -15,8 +15,8 @@ inputs:
   branch:
     description: 'A branch from which delete workflow runs. Default is current branch.'
     required: false
-  run_statuses:
-    description: 'Filter for workflow runs statuses. Accepts statuses: `cancelled`, `skipped`, `timed_out`, `success`, `failure`, `all`.'
+  run_conclusions:
+    description: 'Filter for workflow runs conclusion. Accepts all available conclusions.'
     required: false
     default: 'all'
   save_period:
