@@ -3,7 +3,15 @@ const action = require( './Lib.js' );
 
 //
 
-action.actionCleanRun()
+async function run()
+{
+  const options = action.actionOptionsGet();
+  const runs = await action.workflowRunsGet( options );
+  const filtered = action.workflowRunsFilter( runs );
+  return action.actionCleanRun( options );
+}
+
+run()
 .then( ( e ) =>
 {
   return e;
@@ -12,4 +20,3 @@ action.actionCleanRun()
 {
   core.setFailed( err.message );
 });
-

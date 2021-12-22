@@ -4,7 +4,7 @@ const { Octokit } = require( '@octokit/rest' );
 
 //
 
-function actionCleanRun()
+function actionOptionsGet()
 {
   let token = core.getInput( 'token' );
   if( !token )
@@ -33,8 +33,8 @@ function actionCleanRun()
   const saveMinRunsNumber = core.getMultilineInput( 'save_min_runs_number' );
   const dry = core.getMultilineInput( 'dry' );
 
-  return workflowRunsClean
-  ({
+  const options = 
+  {
     token,
     owner,
     repo,
@@ -43,7 +43,9 @@ function actionCleanRun()
     savePeriod,
     saveMinRunsNumber,
     dry,
-  });
+  };
+
+  return options;
 }
 
 //
@@ -74,11 +76,11 @@ function timeParse( src )
 
 //
 
-async function workflowRunsClean( options )
+function workflowRunsGet( options )
 {
   const octokit = new Octokit({ auth: options.token });
 
-  let toRemove = [];
+  let result = [];
   let runs = null;
   let page = 0;
   do
@@ -88,56 +90,73 @@ async function workflowRunsClean( options )
       owner : options.owner,
       repo : options.repo,
       branch : options.branch,
-      per_page: options.perPage || 100,
+      per_page: 100,
       page,
     });
     runs = response.data.workflow_runs;
-    toRemove.push( ... runs );
+    result.push( ... runs );
     page++;
   }
   while( runs.length === 100 )
 
+  return result;
+}
+
+//
+
+function workflowRunsFilter( runs )
+{
   /* filter not completed */
-  toRemove = toRemove.filter( ( e ) => e.status === 'completed' );
+  let result = runs.filter( ( e ) => e.status === 'completed' );
 
   /* filter by time */
   let savePeriod = Date.now() - options.savePeriod;
-  toRemove = toRemove.filter( ( e ) => Date.parse( e.updated_at ) < savePeriod );
+  result = result.filter( ( e ) => Date.parse( e.updated_at ) < savePeriod );
 
   /* filter by conclusions */
   if( options.conclusions && options.conclusions.length )
   toRemove = toRemove.filter( ( e ) => options.conclusions.includes( e.conclusion ) );
 
-  let saveMinRunsNumber = options.saveMinRunsNumber || 10;
+  if( !options.saveMinRunsNumber )
+  options.saveMinRunsNumber = 10;
 
+  return result;
+}
+
+//
+
+async function workflowRunsClean( runs, options )
+{
   if( options.dry )
-  for( let i = saveMinRunsNumber ; i < toRemove.length ; i++ )
+  for( let i = options.saveMinRunsNumber ; i < runs.length ; i++ )
   {
-    const run_id = toRemove[ i ].id;
-    core.debug( `Deleting workflow run #${ run_id } "${ toRemove[ i ].head_commit.message }"` );
+    const run_id = runs[ i ].id;
+    core.debug( `Deleting workflow run #${ run_id } "${ runs[ i ].head_commit.message }"` );
   }
   else
-  for( let i = saveMinRunsNumber ; i < toRemove.length ; i++ )
+  for( let i = options.saveMinRunsNumber ; i < toRemove.length ; i++ )
   {
-    const run_id = toRemove[ i ].id;
-    core.debug( `Deleting workflow run #${ run_id } "${ toRemove[ i ].head_commit.message }"` );
+    const run_id = runs[ i ].id;
+    core.debug( `Deleting workflow run #${ run_id } "${ runs[ i ].head_commit.message }"` );
     await octokit.actions.deleteWorkflowRun
     ({
-      owner,
-      repo,
+      owner : options.owner,
+      repo : options.repo,
       run_id,
     });
   }
 
-  return toRemove;
+  return runs;
 }
 
 //
 
 const Self =
 {
-  actionCleanRun,
+  actionOptionsGet,
   timeParse,
+  workflowRunsGet,
+  workflowRunsFilter,
   workflowRunsClean,
 };
 
