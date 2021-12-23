@@ -1,6 +1,7 @@
 
 const core = require( '@actions/core' );
 const { Octokit } = require( '@octokit/rest' );
+const octokit = null;
 
 //
 
@@ -27,13 +28,17 @@ function actionOptionsGet()
   let branch = core.getInput( 'branch' );
   if( !branch )
   branch = process.env.GITHUB_REF;
+  if( !branch )
+  throw Error( 'Expects branch. Please add field `branch`.' );
 
   const conclusions = core.getMultilineInput( 'run_conclusions' );
-  const savePeriod = timeParse( core.getMultilineInput( 'save_period' ) );
-  const saveMinRunsNumber = core.getMultilineInput( 'save_min_runs_number' );
-  const dry = core.getMultilineInput( 'dry' );
+  const savePeriod = timeParse( core.getInput( 'save_period' ) || 90 );
+  let saveMinRunsNumber = Number( core.getInput( 'save_min_runs_number' ) ) || null;
+  if( saveMinRunsNumber )
+  saveMinRunsNumber = Math.ceil( saveMinRunsNumber );
+  const dry = core.getInput( 'dry' ).trim() === 'true';
 
-  const options = 
+  const options =
   {
     token,
     owner,
@@ -52,7 +57,7 @@ function actionOptionsGet()
 
 function timeParse( src )
 {
-  if( typeof( src ) === 'number' )
+  if( !isNaN( Number( src ) ) )
   return src * 86400000;
 
   if( typeof( src ) !== 'string' )
@@ -68,7 +73,7 @@ function timeParse( src )
   let baseDelta = 86400000 * days;
   parts[ 0 ] = hours - ( days * 24 );
   const result = baseDelta + Date.parse( `01 Jan 1970 ${ parts.join( ':' ) } GMT` );
-  if( isNan( result ) )
+  if( isNaN( result ) )
   throw Error( 'Wrong time format.' )
 
   return result;
@@ -76,9 +81,9 @@ function timeParse( src )
 
 //
 
-function workflowRunsGet( options )
+async function workflowRunsGet( options )
 {
-  const octokit = new Octokit({ auth: options.token });
+  octokit = new Octokit({ auth: options.token });
 
   let result = [];
   let runs = null;
@@ -106,14 +111,11 @@ function workflowRunsGet( options )
 
 function workflowRunsFilter( runs )
 {
-  /* filter not completed */
   let result = runs.filter( ( e ) => e.status === 'completed' );
 
-  /* filter by time */
   let savePeriod = Date.now() - options.savePeriod;
   result = result.filter( ( e ) => Date.parse( e.updated_at ) < savePeriod );
 
-  /* filter by conclusions */
   if( options.conclusions && options.conclusions.length )
   toRemove = toRemove.filter( ( e ) => options.conclusions.includes( e.conclusion ) );
 
@@ -127,6 +129,9 @@ function workflowRunsFilter( runs )
 
 async function workflowRunsClean( runs, options )
 {
+  if( octokit === null )
+  octokit = new Octokit({ auth: options.token });
+
   if( options.dry )
   for( let i = options.saveMinRunsNumber ; i < runs.length ; i++ )
   {
