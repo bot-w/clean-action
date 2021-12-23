@@ -19,9 +19,11 @@
   "repository": "https://github.com/dmvict/clean-workflow-runs",
   "bugs": "https://github.com/dmvict/clean-workflow-runs/issues",
   "dependencies": {
-    "wTools" : "0.8.1219",
     "@actions/core": "1.6.0",
     "@octokit/rest": "18.12.0"
+  },
+  "devDependencies" : {
+    "wTesting" : ""
   },
   "keywords": [
     "action",
