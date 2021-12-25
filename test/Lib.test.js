@@ -300,6 +300,55 @@ function actionOptionsGet( test )
   process.env.GITHUB_REF = originalBranch;
 }
 
+//
+
+function timeParse( test )
+{
+  test.case = 'src - number, integer';
+  var got = action.timeParse( 1 );
+  test.identical( got, 86400000 );
+
+  test.case = 'src - number, double';
+  var got = action.timeParse( 1.5 );
+  test.identical( got, 1.5 * 86400000 );
+
+  /* */
+
+  test.case = 'src - string, integer like';
+  var got = action.timeParse( '1' );
+  test.identical( got, 86400000 );
+
+  test.case = 'src - string, double like';
+  var got = action.timeParse( '1.5' );
+  test.identical( got, 1.5 * 86400000 );
+
+  test.case = 'src - string, empty';
+  var got = action.timeParse( '' );
+  test.identical( got, 0 );
+
+  test.case = 'src - null';
+  var got = action.timeParse( null );
+  test.identical( got, 0 );
+
+  test.case = 'src - empty array';
+  var got = action.timeParse( [] );
+  test.identical( got, 0 );
+
+  test.case = 'src - single element, number like';
+  var got = action.timeParse( [ '1' ] );
+  test.identical( got, 86400000 );
+
+  /* - */
+
+  if( !Config.debug )
+  return;
+
+  test.case = 'src - wrong type of src';
+  test.shouldThrowErrorSync( () => action.timeParse( undefined ) );
+  test.shouldThrowErrorSync( () => action.timeParse( [ 'a' ] ) );
+  test.shouldThrowErrorSync( () => action.timeParse( [ 1, 2 ] ) );
+}
+
 // --
 // declare
 // --
@@ -313,6 +362,7 @@ const Proto =
   tests :
   {
     actionOptionsGet,
+    timeParse,
   },
 };
 
