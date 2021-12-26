@@ -28,7 +28,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -44,7 +44,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 86400000,
     saveMinRunsNumber : null,
@@ -61,7 +61,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 3600000,
     saveMinRunsNumber : null,
@@ -80,7 +80,7 @@ function actionOptionsGet( test )
     token : 'bar',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -97,7 +97,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'some-user',
     repo : 'repository',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -133,7 +133,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [ 'one' ],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -150,7 +150,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [ 'one', 'two' ],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -169,7 +169,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -186,7 +186,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : 1,
@@ -203,7 +203,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : 2,
@@ -222,7 +222,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -239,7 +239,7 @@ function actionOptionsGet( test )
     token : 'abc',
     owner : 'user',
     repo : 'repo',
-    branch : 'custom',
+    branch : '',
     conclusions : [],
     savePeriod : 7776000000,
     saveMinRunsNumber : null,
@@ -261,24 +261,18 @@ function actionOptionsGet( test )
     test.case = 'no token';
     delete process.env.GITHUB_TOKEN;
     process.env.GITHUB_REPOSITORY = 'user/branch';
-    process.env.GITHUB_REF = 'custom';
+    process.env.GITHUB_REF = '';
     test.shouldThrowErrorSync( () => action.actionOptionsGet() );
 
     test.case = 'no repo';
     process.env.GITHUB_TOKEN = 'abc';
     delete process.env.GITHUB_REPOSITORY;
-    process.env.GITHUB_REF = 'custom';
-    test.shouldThrowErrorSync( () => action.actionOptionsGet() );
-
-    test.case = 'no branch';
-    process.env.GITHUB_TOKEN = 'abc';
-    process.env.GITHUB_REPOSITORY = 'user/repo';
-    delete process.env.GITHUB_REF;
+    process.env.GITHUB_REF = '';
     test.shouldThrowErrorSync( () => action.actionOptionsGet() );
 
     test.case = 'invalid repo format';
     process.env.GITHUB_TOKEN = 'abc';
-    process.env.GITHUB_REF = 'custom';
+    process.env.GITHUB_REF = '';
     process.env.GITHUB_REPOSITORY = 'user';
     test.shouldThrowErrorSync( () => action.actionOptionsGet() );
     process.env.GITHUB_REPOSITORY = 'user:repo';
@@ -349,6 +343,105 @@ function timeParse( test )
   test.shouldThrowErrorSync( () => action.timeParse( [ 1, 2 ] ) );
 }
 
+//
+
+function workflowRunsGet( test )
+{
+  const token = process.env.PRIVATE_TOKEN;
+  if( !token )
+  return test.true( true );
+
+  const a = test.assetFor( false );
+  const owner = 'dmvict';
+  const repo = 'clean-workflow-runs-test';
+
+  /* */
+
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo }) );
+  a.ready.then( ( op ) =>
+  {
+    test.case = 'public repository, no branch';
+    test.identical( op.length, 212 );
+    test.identical( op[ 0 ].name, 'TimedOut' );
+    test.identical( op[ 1 ].name, 'TimedOut' );
+    for( let i = 2 ; i < 12 ; i++ )
+    test.identical( op[ i ].name, 'Cancel' );
+    for( let i = 12 ; i < 62 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    for( let i = 62 ; i < 112 ; i++ )
+    test.identical( op[ i ].name, 'Skip' );
+    for( let i = 112 ; i < 212 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    return null;
+  });
+
+  /* */
+
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo, branch : '' }) );
+  a.ready.then( ( op ) =>
+  {
+    test.case = 'public repository, branch - empty string';
+    test.identical( op.length, 212 );
+    test.identical( op[ 0 ].name, 'TimedOut' );
+    test.identical( op[ 1 ].name, 'TimedOut' );
+    for( let i = 2 ; i < 12 ; i++ )
+    test.identical( op[ i ].name, 'Cancel' );
+    for( let i = 12 ; i < 62 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    for( let i = 62 ; i < 112 ; i++ )
+    test.identical( op[ i ].name, 'Skip' );
+    for( let i = 112 ; i < 212 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    return null;
+  });
+
+  /* */
+
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo, branch : 'master' }) );
+  a.ready.then( ( op ) =>
+  {
+    test.case = 'public repository, explicitly defined branch, default branch';
+    test.identical( op.length, 162 );
+    test.identical( op[ 0 ].name, 'TimedOut' );
+    test.identical( op[ 1 ].name, 'TimedOut' );
+    for( let i = 2 ; i < 12 ; i++ )
+    test.identical( op[ i ].name, 'Cancel' );
+    for( let i = 12 ; i < 62 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    for( let i = 62 ; i < 112 ; i++ )
+    test.identical( op[ i ].name, 'Skip' );
+    for( let i = 112 ; i < 162 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    return null;
+  });
+
+  /* */
+
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo, branch : 'less_than_100' }) );
+  a.ready.then( ( op ) =>
+  {
+    test.case = 'public repository, default branch';
+    test.identical( op.length, 50 );
+    for( let i = 0 ; i < 50 ; i++ )
+    test.identical( op[ i ].name, 'Conditional' );
+    return null;
+  });
+
+  /* */
+
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo, branch : 'zero_runs' }) );
+  a.ready.then( ( op ) =>
+  {
+    test.case = 'public repository, default branch';
+    test.identical( op.length, 0 );
+    return null;
+  });
+
+  return a.ready;
+}
+
+workflowRunsGet.timeOut = 60000;
+
 // --
 // declare
 // --
@@ -363,6 +456,7 @@ const Proto =
   {
     actionOptionsGet,
     timeParse,
+    workflowRunsGet,
   },
 };
 

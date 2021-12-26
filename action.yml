@@ -13,16 +13,15 @@ inputs:
     description: 'A repo from which delete workflow runs. Default is current repo.'
     required: false
   branch:
-    description: 'A branch from which delete workflow runs. Default is current branch.'
+    description: 'A branch from which delete workflow runs. Default is all branches.'
     required: false
   run_conclusions:
     description: 'Filter for workflow runs conclusion. Accepts all available conclusions.'
     required: false
-    default: 'all'
   save_period:
     description: 'Determines period in which the workflow runs will be saved.'
     required: false
-    default: '2120:00:00'
+    default: 90
   save_min_runs_number:
     description: 'A minimal number of completed runs which will be saved.'
     required: false

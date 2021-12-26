@@ -25,9 +25,9 @@ Default: current repository.
 
 ### `branch`
 
-A branch from which delete workflow runs. Default is current branch.
+A branch from which delete workflow runs. Default is all branches..
 
-Default: current branch.
+Default: all branches.
 
 ### `run_conclusions`
 
@@ -55,9 +55,7 @@ Enables dry run of action. Action will print the list of workflow runs to delete
 
 Default: false.
 
-## Example usage
-
-### Retry action
+## Example of usage
 
 ```yaml
 uses: dmvict/clean-workflow-runs@v1.0.0
@@ -68,6 +66,5 @@ with:
   run_conclusions: |
     cancelled
     skipped
-  save_period: '00:00:00'
+  save_period: '15:00:00'
 ```
-

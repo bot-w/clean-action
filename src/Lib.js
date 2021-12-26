@@ -1,7 +1,7 @@
 
 const core = require( '@actions/core' );
 const { Octokit } = require( '@octokit/rest' );
-const octokit = null;
+let octokit = null;
 
 //
 
@@ -25,12 +25,7 @@ function actionOptionsGet()
   if( !owner || !repo || splits.length > 2 )
   throw Error( 'Expects repo in format {owner}/{repo_name}. Please add field `repo`.' );
 
-  let branch = core.getInput( 'branch' );
-  if( !branch )
-  branch = process.env.GITHUB_REF;
-  if( !branch )
-  throw Error( 'Expects branch. Please add field `branch`.' );
-
+  const branch = core.getInput( 'branch' );
   const conclusions = core.getMultilineInput( 'run_conclusions' );
   const savePeriod = timeParse( core.getInput( 'save_period' ) || 90 );
   let saveMinRunsNumber = Number( core.getInput( 'save_min_runs_number' ) ) || null;
@@ -87,7 +82,7 @@ async function workflowRunsGet( options )
 
   let result = [];
   let runs = null;
-  let page = 0;
+  let page = 1;
   do
   {
     const response = await octokit.actions.listWorkflowRunsForRepo
