@@ -15,6 +15,10 @@ function actionOptionsGet( test )
   const originalRepo = process.env.GITHUB_REPOSITORY;
   const originalBranch = process.env.GITHUB_REF;
 
+  delete process.env.GITHUB_TOKEN;
+  delete process.env.GITHUB_REPOSITORY;
+  delete process.env.GITHUB_REF;
+
   process.env.GITHUB_TOKEN = 'abc';
   process.env.GITHUB_REPOSITORY = 'user/repo';
   process.env.GITHUB_REF = 'custom';
