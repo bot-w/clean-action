@@ -1,5 +1,5 @@
 
-# clean-workflow-runs [![status](https://github.com/dmvict/clean-workflow-runs/actions/workflows/Publish.yml/badge.svg)](https://github.com/dmvict/clean-workflow-runs/actions/workflows/Publish.yml) [![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://github.com/emersion/stability-badges#stable)
+# clean-workflow-runs [![status](https://github.com/dmvict/clean-action/actions/workflows/Publish.yml/badge.svg)](https://github.com/dmvict/clean-action/actions/workflows/Publish.yml) [![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://github.com/emersion/stability-badges#stable)
 
 Flexible and configurable action for removing completed workflow runs.
 
