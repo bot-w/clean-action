@@ -5,6 +5,8 @@ on: [ push ]
 
 jobs:
   test:
+    env :
+      PRIVATE_TOKEN : ${{ secrets.PRIVATE_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
