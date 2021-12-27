@@ -28,8 +28,10 @@ function actionOptionsGet()
   const branch = core.getInput( 'branch' );
   const conclusions = core.getMultilineInput( 'run_conclusions' );
   const savePeriod = timeParse( core.getInput( 'save_period' ) || 90 );
-  let saveMinRunsNumber = Number( core.getInput( 'save_min_runs_number' ) ) || null;
+  let saveMinRunsNumber = core.getInput( 'save_min_runs_number' );
   if( saveMinRunsNumber )
+  saveMinRunsNumber = Number( saveMinRunsNumber );
+  if( saveMinRunsNumber || saveMinRunsNumber === 0 )
   saveMinRunsNumber = Math.ceil( saveMinRunsNumber );
   else
   saveMinRunsNumber = 10;
