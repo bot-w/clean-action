@@ -133,13 +133,13 @@ async function workflowRunsClean( runs, options )
   for( let i = 0 ; i < runs.length ; i++ )
   {
     const run_id = runs[ i ].id;
-    core.debug( `Deleting workflow run #${ run_id } "${ runs[ i ].head_commit.message }"` );
+    core.info( `Deleting workflow run::#${ run_id } commit message::"${ runs[ i ].head_commit.message }"` );
   }
   else
   for( let i = 0 ; i < toRemove.length ; i++ )
   {
     const run_id = runs[ i ].id;
-    core.debug( `Deleting workflow run #${ run_id } "${ runs[ i ].head_commit.message }"` );
+    core.info( `Deleting workflow run::#${ run_id } commit message::"${ runs[ i ].head_commit.message }"` );
     await octokit.actions.deleteWorkflowRun
     ({
       owner : options.owner,
@@ -147,8 +147,6 @@ async function workflowRunsClean( runs, options )
       run_id,
     });
   }
-
-  return runs;
 }
 
 //

@@ -449,8 +449,6 @@ workflowRunsGet.timeOut = 60000;
 function workflowRunsFilter( test )
 {
   const a = test.assetFor( false );
-  const owner = 'dmvict';
-  const repo = 'clean-workflow-runs-test';
   const runs = a.fileProvider.fileReadUnknown( a.abs( __dirname, 'assets/runs.json' ) );
 
   /* */
@@ -515,6 +513,41 @@ function workflowRunsFilter( test )
   test.true( got !== runs );
 }
 
+//
+
+function workflowRunsClean( test )
+{
+  const token = process.env.PRIVATE_TOKEN;
+  if( !token )
+  return test.true( true );
+
+  const a = test.assetFor( false );
+  const owner = 'dmvict';
+  const repo = 'clean-workflow-runs-test';
+  const runs = a.fileProvider.fileReadUnknown( a.abs( __dirname, 'assets/runs.json' ) );
+
+  /* - */
+
+  a.ready.then( () => action.workflowRunsClean( runs, { token, owner, repo, dry : true } ) );
+  a.ready.then( ( op ) =>
+  {
+    test.identical( runs.length, 212 );
+    test.identical( op, null );
+    return null
+  });
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo }) );
+  a.ready.then( ( op ) =>
+  {
+    test.case = 'public repository, no branch';
+    test.identical( op.length, 212 );
+    return null;
+  });
+
+  /* - */
+
+  return a.ready;
+}
+
 // --
 // declare
 // --
@@ -531,10 +564,10 @@ const Proto =
     timeParse,
     workflowRunsGet,
     workflowRunsFilter,
+    workflowRunsClean,
   },
 };
 
 const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self.name );
-
