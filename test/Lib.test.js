@@ -15,13 +15,18 @@ function actionOptionsGet( test )
   const originalRepo = process.env.GITHUB_REPOSITORY;
   const originalBranch = process.env.GITHUB_REF;
 
-  delete process.env.GITHUB_TOKEN;
-  delete process.env.GITHUB_REPOSITORY;
-  delete process.env.GITHUB_REF;
+  delete process.env.INPUT_SAVE_PERIOD;
+  delete process.env.INPUT_BRANCH;
+  delete process.env.INPUT_RUN_CONCLUSIONS;
+  delete process.env.INPUT_SAVE_MIN_RUNS_NUMBER;
+  delete process.env.INPUT_DRY;
 
   process.env.GITHUB_TOKEN = 'abc';
   process.env.GITHUB_REPOSITORY = 'user/repo';
   process.env.GITHUB_REF = 'custom';
+
+  const insideTestContainer = _.process.insideTestContainer();
+  const defaultToken = insideTestContainer ? originalToken : 'abc';
 
   /* - */
 
@@ -29,7 +34,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -45,7 +50,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -62,7 +67,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -98,7 +103,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'some-user',
     repo : 'repository',
     branch : '',
@@ -115,7 +120,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : 'complex/branch',
@@ -134,7 +139,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -151,7 +156,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -170,7 +175,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -187,7 +192,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -204,7 +209,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -223,7 +228,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
@@ -240,7 +245,7 @@ function actionOptionsGet( test )
   var got = action.actionOptionsGet();
   var exp =
   {
-    token : 'abc',
+    token : defaultToken,
     owner : 'user',
     repo : 'repo',
     branch : '',
