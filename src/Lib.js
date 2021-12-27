@@ -31,6 +31,8 @@ function actionOptionsGet()
   let saveMinRunsNumber = Number( core.getInput( 'save_min_runs_number' ) ) || null;
   if( saveMinRunsNumber )
   saveMinRunsNumber = Math.ceil( saveMinRunsNumber );
+  else
+  saveMinRunsNumber = 10;
   const dry = core.getInput( 'dry' ).trim() === 'true';
 
   const options =
@@ -104,7 +106,7 @@ async function workflowRunsGet( options )
 
 //
 
-function workflowRunsFilter( runs )
+function workflowRunsFilter( runs, options )
 {
   let result = runs.filter( ( e ) => e.status === 'completed' );
 
@@ -112,10 +114,10 @@ function workflowRunsFilter( runs )
   result = result.filter( ( e ) => Date.parse( e.updated_at ) < savePeriod );
 
   if( options.conclusions && options.conclusions.length )
-  toRemove = toRemove.filter( ( e ) => options.conclusions.includes( e.conclusion ) );
+  result = result.filter( ( e ) => options.conclusions.includes( e.conclusion ) );
 
-  if( !options.saveMinRunsNumber )
-  options.saveMinRunsNumber = 10;
+  if( options.saveMinRunsNumber )
+  result.splice( 0, options.saveMinRunsNumber );
 
   return result;
 }
@@ -128,13 +130,13 @@ async function workflowRunsClean( runs, options )
   octokit = new Octokit({ auth: options.token });
 
   if( options.dry )
-  for( let i = options.saveMinRunsNumber ; i < runs.length ; i++ )
+  for( let i = 0 ; i < runs.length ; i++ )
   {
     const run_id = runs[ i ].id;
     core.debug( `Deleting workflow run #${ run_id } "${ runs[ i ].head_commit.message }"` );
   }
   else
-  for( let i = options.saveMinRunsNumber ; i < toRemove.length ; i++ )
+  for( let i = 0 ; i < toRemove.length ; i++ )
   {
     const run_id = runs[ i ].id;
     core.debug( `Deleting workflow run #${ run_id } "${ runs[ i ].head_commit.message }"` );

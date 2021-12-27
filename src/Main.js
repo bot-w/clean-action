@@ -7,7 +7,7 @@ async function run()
 {
   const options = action.actionOptionsGet();
   const runs = await action.workflowRunsGet( options );
-  const filtered = action.workflowRunsFilter( runs );
+  const filtered = action.workflowRunsFilter( runs, options );
   return action.actionCleanRun( filtered, options );
 }
 

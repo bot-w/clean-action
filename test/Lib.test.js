@@ -31,7 +31,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -47,7 +47,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 86400000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -64,7 +64,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 3600000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -83,7 +83,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -100,7 +100,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -117,7 +117,7 @@ function actionOptionsGet( test )
     branch : 'complex/branch',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -136,7 +136,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [ 'one' ],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -153,7 +153,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [ 'one', 'two' ],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -172,7 +172,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -225,7 +225,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : false,
   };
   test.identical( got, exp );
@@ -242,7 +242,7 @@ function actionOptionsGet( test )
     branch : '',
     conclusions : [],
     savePeriod : 7776000000,
-    saveMinRunsNumber : null,
+    saveMinRunsNumber : 10,
     dry : true,
   };
   test.identical( got, exp );
@@ -437,10 +437,96 @@ function workflowRunsGet( test )
     return null;
   });
 
+  /* - */
+
   return a.ready;
 }
 
 workflowRunsGet.timeOut = 60000;
+
+//
+
+function workflowRunsFilter( test )
+{
+  const token = process.env.PRIVATE_TOKEN;
+  if( !token )
+  return test.true( true );
+
+  const a = test.assetFor( false );
+  const owner = 'dmvict';
+  const repo = 'clean-workflow-runs-test';
+
+  /* */
+
+  a.ready.then( () => action.workflowRunsGet({ token, owner, repo }) );
+  a.ready.then( ( runs ) =>
+  {
+    test.case = 'filter by only time, save no runs';
+    var options = { savePeriod : 0, saveMinRunsNumber : 0 };
+    var got = action.workflowRunsFilter( runs, options );
+    test.identical( got[ 0 ].name, 'TimedOut' );
+    test.identical( got, runs );
+    test.true( got !== runs );
+
+    test.case = 'filter by only time, too long save period - 10 years';
+    var options = { savePeriod : 3652 * 86400000, saveMinRunsNumber : 0 };
+    var got = action.workflowRunsFilter( runs, options );
+    test.identical( got, [] );
+    test.true( got !== runs );
+
+    /* */
+
+    test.case = 'filter by only conclusions, conclusions - empty array';
+    var options = { savePeriod : 0, saveMinRunsNumber : 0, conclusions : [] };
+    var got = action.workflowRunsFilter( runs, options );
+    test.identical( got[ 0 ].name, 'TimedOut' );
+    test.identical( got, runs );
+    test.true( got !== runs );
+
+    test.case = 'filter by only conclusions, invalid conclusions - delete nothing';
+    var options = { savePeriod : 0, saveMinRunsNumber : 0, conclusions : [ 'invalid' ] };
+    var got = action.workflowRunsFilter( runs, options );
+    test.identical( got, [] );
+    test.true( got !== runs );
+
+    test.case = 'filter by only conclusions, valid conclusions - single conclusion - delete runs';
+    var options = { savePeriod : 0, saveMinRunsNumber : 0, conclusions : [ 'success' ] };
+    var got = action.workflowRunsFilter( runs, options );
+    test.identical( got.length, 100 );
+    test.true( got !== runs );
+
+    test.case = 'filter by only conclusions, valid conclusions - several conclusions - delete runs';
+    var options = { savePeriod : 0, saveMinRunsNumber : 0, conclusions : [ 'success', 'skipped' ] };
+    var got = action.workflowRunsFilter( runs, options );
+    test.identical( got.length, 125 );
+    test.true( got !== runs );
+
+    /* */
+
+    test.case = 'get all runs, not zero save runs';
+    var options = { savePeriod : 0, saveMinRunsNumber : 10, conclusions : [] };
+    var got = action.workflowRunsFilter( runs, options );
+    var exp = action.workflowRunsFilter( runs, { savePeriod : 0, saveMinRunsNumber : 0, conclusions : [] } )
+    exp.splice( 0, 10 );
+    test.identical( got, exp );
+    test.identical( got[ 0 ].name, 'Cancel' );
+    test.true( got !== runs );
+
+    test.case = 'get runs by conclusions, non zero save runs';
+    var options = { savePeriod : 0, saveMinRunsNumber : 10, conclusions : [ 'success', 'skipped' ] };
+    var got = action.workflowRunsFilter( runs, options );
+    var exp = action.workflowRunsFilter( runs, { savePeriod : 0, saveMinRunsNumber : 0, conclusions : [ 'success', 'skipped' ] } )
+    exp.splice( 0, 10 );
+    test.identical( got, exp );
+    test.true( got !== runs );
+
+    return null
+  });
+
+  /* - */
+
+  return a.ready;
+}
 
 // --
 // declare
@@ -457,6 +543,7 @@ const Proto =
     actionOptionsGet,
     timeParse,
     workflowRunsGet,
+    workflowRunsFilter,
   },
 };
 
