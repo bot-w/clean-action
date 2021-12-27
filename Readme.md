@@ -39,7 +39,7 @@ _Note:_ : if filter is not defined, then action filters runs by time.
 
 Determines period in which the workflow runs will be saved.
 
-The input should be a string in format `hh:mm:ss`.
+The input should be a number that define number of days or string in format `hh:mm:ss`.
 
 Default: 90 days.
 
